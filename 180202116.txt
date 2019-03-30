@@ -1,0 +1,889 @@
+
+import java.awt.HeadlessException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import javax.swing.JFrame;
+
+
+public class AnaEkran extends JFrame{
+static List<Integer>path= new ArrayList<Integer>();
+public static int  min_distK =Integer.MAX_VALUE;
+public static String s="";
+public static String sa ="";
+static String[] yol={"","","","",""};
+static int haritaX=0,haritaY=0;
+static  int[][] harita = new int[12][15];
+static String[] karakter={"","","","","",""};
+static String[] kapi ={"","","","","",""};
+static int kapiX[]= new int[5];
+static int kapiY[]= new int[5];
+static int t=0;
+static String iyi_karakter;
+    public AnaEkran(String title) throws HeadlessException {
+        super(title);
+        
+    }
+    
+    
+    
+    public static void main(String[] args) throws IOException {
+        
+        //Scanner scanner = new Scanner(System.in);
+       // System.out.println("Ýyi karakteri giriniz:");
+       // iyi_karakter=scanner.nextLine();
+        
+        
+        AnaEkran ekran = new AnaEkran("Grafik Kullanýmý");        
+         FileInputStream fis=null;
+        
+        try {
+            fis = new FileInputStream("harita.txt");
+        } catch (FileNotFoundException ex) {
+            System.out.println("Dosya okunamadi");
+        }
+       
+       
+        int deger,syc=0,i=0,j=0,kntrl=0;
+        String s="";
+        
+        //KARAKTERLERÝN DÝZÝYE ATANDIÐI KISIM
+           while((deger =fis.read())!=-1&&((char)deger)!='0'){
+                if(((char)deger)=='K'){
+                    fis.skip(8);
+                    deger =fis.read();
+                    while(((char)deger)!=','){
+                        karakter[i]+=(char)deger;
+                        if(karakter[i].equals("MasterYoda")||karakter[i].equals("LukeSkywalker")){
+                        iyi_karakter=karakter[i];
+                        karakter[i]="";
+                        fis.skip(10);
+                    }
+                        deger =fis.read();
+                    } 
+                    i++;
+                    
+                }
+                if(((char)deger)==','){
+                    fis.skip(5);
+                    deger =fis.read();
+                    kapi[t]+=(char)deger;
+                    t++;
+                }
+            }
+
+           //Harita Yükleme
+           for(haritaX=0;haritaX<11;haritaX++){
+            for(haritaY=0;haritaY<14;haritaY++){
+                   s +=(char)deger;
+                   harita[haritaX][haritaY] =Integer.parseInt(s);  
+                   deger =fis.read();
+                   deger =fis.read();
+                   s="";
+                   //System.out.print(harita[haritaX][haritaY]+" ");
+               }
+              // System.out.println("");
+           }
+            for(haritaX=0;haritaX<11;haritaX++){
+            for(haritaY=0;haritaY<14;haritaY++){
+                // System.out.print(harita[haritaX][haritaY]+" ");
+               }
+               //System.out.println("");
+           }
+           
+           fis.close();
+           int p;
+           for(p=0 ;p<t;p++){
+               //System.out.println(kapi[p]);
+               if(kapi[p].equals("A")){
+                  kapiX[p]=0;
+                  kapiY[p]=5;
+               }
+               if(kapi[p].equals("B")){
+                  kapiX[p]=4;
+                  kapiY[p]=0;
+               }
+               if(kapi[p].equals("C")){
+                  kapiX[p]=12;
+                  kapiY[p]=0;
+               }
+               if(kapi[p].equals("D")){
+                  kapiX[p]=13;
+                  kapiY[p]=5;
+               }
+               if(kapi[p].equals("E")){
+                  kapiX[p]=4;
+                  kapiY[p]=10;
+               }
+               
+           }
+        ekran.setResizable(true);//Ekranýn geniþleyebilir olmasýný engelliyoruz
+        ekran.setFocusable(false);//JFrame odaklanmasýný engelliyoruz.
+        ekran.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        ekran.setSize(1920,1000);
+        
+        GrafikKullanýmý grafik = new GrafikKullanýmý();
+        grafik.esitle(AnaEkran.harita);
+        grafik.Kesitle(karakter);
+        grafik.requestFocus();//JPanel'in klavyeden gelicek deðerlere odaklanmasýný saðlar.
+        grafik.addKeyListener(grafik);//Klavye üzerindeki iþlemlerimizi saðlýyor.Ýçine oyunu verdiðimiz için sadece oyunun üzerinde çalýþýcak
+        grafik.setFocusable(true);//JPanel'in odaðý almasýný saðlarýz.
+        //grafik.setFocusTraversalKeysEnabled(false);
+        
+          ekran.add(grafik);
+          ekran.setVisible(true);
+          
+          
+    }
+    
+}
+
+
+
+
+
+
+
+
+
+public class DarthVader extends Karakter {
+    
+    public DarthVader(int x, int y, String Karakter_adi, String tur) {
+        super(x, y, Karakter_adi, tur);
+    }
+
+    @Override
+    public int findShortestPath(int[][] mat, int[][] visited, int y2, int x2, int y1, int x1, int min_dist, int dist) {
+        
+        int KX=x2;
+        int KY=y2;
+        int syc=0;
+        
+        AnaEkran.path.add(getX());
+        AnaEkran.path.add(getY());
+        
+        while(KX!=x1||KY!=y1){
+            syc++;
+            
+            if(KY>=0){
+                if(KY!=y1&&KY<y1){
+                    KY++;
+                    AnaEkran.path.add(KY);
+                    AnaEkran.path.add(KX);
+                }
+                 else if(KY!=y1&&KY>y1) {
+                    KY--;
+                    AnaEkran.path.add(KY);
+                    AnaEkran.path.add(KX);
+                 }
+            }
+            if(KX>=0){
+                if(KX>=0&&KX!=x1&&KX<x1){
+                    KX++;
+                    AnaEkran.path.add(KY);
+                    AnaEkran.path.add(KX);
+                }
+           else if(KX>=0&&KX!=x1&&KX>x1){
+                    KX--;
+                    AnaEkran.path.add(KY);
+                    AnaEkran.path.add(KX);
+                }
+           }         
+           if(KX==x1&&KY==y1){
+               break;
+           }      
+       }
+        
+       AnaEkran.sa=AnaEkran.path.toString();
+       AnaEkran.min_distK=syc;
+       
+       return syc;
+    }
+    
+    
+    
+}
+
+
+
+
+
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.TextArea;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.imageio.stream.FileImageInputStream;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.Timer;
+
+public class GrafikKullanýmý extends JPanel implements KeyListener,ActionListener{
+    
+    float can,can2;
+    int min_dist,tus_k=0,z=AnaEkran.t;
+    int[][] visited = new int[11][14];
+    String[] Karakter={"","","","",""};
+    static int c=0;
+    int candir=0;
+    int[] yolA=new int[80];
+    private BufferedImage image,image2,image3,image4,image5,image6,image7;
+    KarakterUret uret = new KarakterUret();
+    Karakter iyiK=uret.karakter_uret(AnaEkran.iyi_karakter);
+    Karakter[] kötüK = new Karakter[5];
+    static  int[][] harita = new int[12][15];
+    
+    public void Kesitle(String[] a){
+        for(int i=0;i<z;i++){
+            Karakter[i]+=a[i];
+            //System.out.println(Karakter[i]);
+        }
+    }
+                  
+    public void esitle(int harita2[][]){          
+        for(int i=0;i<11;i++){
+            for(int j=0;j<14;j++){           
+                GrafikKullanýmý.harita[i][j]=harita2[i][j];             
+            }        
+        }
+    }
+    //Can sistemi bu kýsýmda kontrol altýna alýnýyor eðer karakter yakalandýysa canýný sazaltýyoruz eðer bittiysede oyunun bittiðini bildiren masej atýyoruz
+    public void oyunBittiMi(){
+        if(can>0){
+            can--;
+            AnaEkran.sa="";
+            AnaEkran.path.clear();            
+        }
+        if(can==0){   
+            JOptionPane.showMessageDialog(this,"ÝYÝ KARAKTER KAYBETTÝ");
+            System.exit(0);    
+            }
+    }
+    //Ýyi karakterin bitiþ nokasýnýna ulaþýp ulaþmadýðýný kontrol ediyoruz.Ulaþtýysa ulaþtýðýna dair mesaj atýyoruz.
+    public void kazandiMi(){
+        if(iyiK.getX()==9&&iyiK.getY()==13){
+            JOptionPane.showMessageDialog(this,"ÝYÝ KARAKTER KAZANDI");
+            System.exit(0);
+        }
+    }
+    //Dosyada okuduðumuz verileri karakter yakalandýðýnda sýfýrlayabilmek için static þekilde ayarlardýk bu sayade oyunun tur tur oluþmasýný saðladýk
+     public  void OyunuSýfýrla(){
+          for(int p=0 ;p<z;p++){
+               if(AnaEkran.kapi[p].equals("A")){
+                  AnaEkran.kapiX[p]=0;
+                  AnaEkran.kapiY[p]=5;
+               }
+               if(AnaEkran.kapi[p].equals("B")){
+                  AnaEkran.kapiX[p]=4;
+                  AnaEkran.kapiY[p]=0;
+               }
+               if(AnaEkran.kapi[p].equals("C")){
+                  AnaEkran.kapiX[p]=12;
+                 AnaEkran. kapiY[p]=0;
+               }
+               if(AnaEkran.kapi[p].equals("D")){
+                 AnaEkran. kapiX[p]=13;
+                  AnaEkran.kapiY[p]=5;
+               }
+               if(AnaEkran.kapi[p].equals("E")){
+                  AnaEkran.kapiX[p]=4;
+                  AnaEkran.kapiY[p]=10;
+               }
+               iyiK.setX(5);
+               iyiK.setY(6);
+               AnaEkran.sa="";
+               AnaEkran.path.clear();
+        }    
+     }
+   
+    @Override
+    public void paint(Graphics g) {  
+        super.paint(g); 
+        System.out.println("----------------------------------------------------------------------------------------------------------------");
+        candir=0;
+        //JPanel üzerindeki can göstergesini oluþturmak için kullanýyoruz.
+        for(int t=0;t<can;t++){
+            g.fillRect(1100+candir*90,0, 70, 70);
+            g.drawImage(image7,1100+candir*90,0,image7.getWidth()/(4),image7.getHeight()/(4),this);
+            candir++;
+        }
+     
+        for(int i=0;i<11;i++){
+            for(int j=0;j<14;j++){
+                
+                if(AnaEkran.harita[i][j]==0) g.setColor(Color.white);
+                else  g.setColor(Color.blue);
+                
+                g.fillRect(70*j,70*i,70,70);
+            }
+        
+        }
+        //Labirentin çýkýsýna kupa resmini eklemek için kullanýyoruz.
+        g.drawImage(image,1000,620,image.getWidth()/2,image.getHeight()/2,this);
+        
+        //Çizdiðimiz karelerin belirgin olmasý için aralarda siyah çizgiler olmasýný saðlýyoruz.
+        g.setColor(Color.black);
+        for(int i=0;i<11;i++){
+            for(int j=0;j<14;j++){
+                g.drawRect((j*70),(i*70), 70, 70);
+            }
+        }
+        
+      
+        for(c=0;c<z;c++){
+            //Karakterler dizi þekilinde kullanýlarak gereksiz obje oluþumunun önüne geçildi.
+            kötüK[c]=uret.karakter_uret2(Karakter[c],c);
+            //Yollanan iyi ve kötü karakter komutlarýna göre minimum ifadeyi bulan fonksyon   
+            min_dist=kötüK[c].findShortestPath(harita, visited, kötüK[c].getX(),kötüK[c].getY(),iyiK.getX(),iyiK.getY(),Integer.MAX_VALUE, 0);
+           //Alt kýsýmda bulduðumuz minimum deðere ait verileri parçalýyoruz. 
+            if(min_dist==AnaEkran.min_distK){}
+            else AnaEkran.sa=AnaEkran.path.toString();
+            AnaEkran.sa=AnaEkran.sa.replaceAll("\\s","");
+            String[] result = AnaEkran.sa.split(",");
+            yolA[0]=Character.getNumericValue(result[0].charAt(1));  
+            
+            int x;
+            for (x=1; x<result.length-1; x++){
+               yolA[x]= Integer.parseInt(result[x]);
+            }
+            
+           String as =result[x];
+           String ta="";
+           for(int q=0;q<as.length();q++){
+               if(as.charAt(q)!=']'){
+                   ta+=as.charAt(q);
+               }
+           }
+           yolA[x]=Integer.valueOf(ta);
+          
+           //En kýsa yolu aldýðýmýz kordinatlara göre çiziyoruz
+           g.setColor(Color.red);
+           for(int c =2;c<x-2;c+=2){
+                g.fillRect(70*yolA[c+1],70*yolA[c],70,70);
+           }
+           
+         
+           //Oyunda olan karakterlerin resmini haritada gerekli kordinatlara ekliyoruz
+           try{
+            if(kötüK[c].getKarakter_adi().equals("Stormtrooper")){
+             g.drawImage(image4,70*kötüK[c].getY(),70*kötüK[c].getX(),image4.getWidth()/(4),image4.getHeight()/(4),this);
+              
+            }
+           if(kötüK[c].getKarakter_adi().equals("KYLOREN")){
+              g.drawImage(image5,70*kötüK[c].getY(),70*kötüK[c].getX(),image5.getWidth()/(4),image5.getHeight()/(4),this);
+              
+            }
+           if(kötüK[c].getKarakter_adi().equals("DarthVader")){
+              g.drawImage(image6,70*kötüK[c].getY(),70*kötüK[c].getX(),image6.getWidth()/4,image6.getHeight()/4,this);
+              
+            }
+           if(iyiK.getKarakter_adi().equals("MasterYoda")){
+           g.drawImage(image2,70*iyiK.getY(),70*iyiK.getX(),image2.getWidth()/(4),image2.getHeight()/(4),this);
+           }
+           if(iyiK.getKarakter_adi().equals("LukeSkywalker")){
+           g.drawImage(image3,70*iyiK.getY(),70*iyiK.getX(),image3.getWidth()/(2),image3.getHeight()/(2),this);
+           }
+           }
+           catch(Exception e){
+               
+           }
+          
+             
+       //Harita üzerinde kötü karakterlerin takibini saðladýðýmýz kýsým KYLOREN iki birim ilerdiði için ona özel bir durum yarattýk.
+       if(kötüK[c].getKarakter_adi().equals("KYLOREN")){
+            
+        if(min_dist==1){
+            AnaEkran.kapiY[c]=iyiK.getX();
+            AnaEkran.kapiX[c]=iyiK.getY();
+        }
+        else{
+            AnaEkran.kapiY[c]=yolA[4];
+        AnaEkran.kapiX[c]=yolA[5];
+        }
+      
+        }
+       else{
+        AnaEkran.kapiY[c]=yolA[2];
+        AnaEkran.kapiX[c]=yolA[3];
+       }
+        
+       
+        //Karakterlerin yakalanmasý ve oyunun tekrar baþlamasý burdaki koþul ile yapýlýyor
+        if(kötüK[c].getX()==iyiK.getX()&&kötüK[c].getY()==iyiK.getY()){
+            oyunBittiMi();
+            OyunuSýfýrla();
+            repaint();
+            break;
+        }
+        
+        //Ýyi karakterlerin kazanýp kazanmadýðýný bu fonksiyonla saðlýyoruz
+        kazandiMi();
+        
+            System.out.println(kötüK[c].getKarakter_adi()+" adlý karakterin "+iyiK.getKarakter_adi()+" adlý karakteri yakalmasý için "+min_dist+" birim haraket etmesi gerekir");
+            System.out.println("");
+     
+        //sa deðiþkenini ve path deðiþkenini statik olarak kulladýðýmýz için tur sonunda sýfýrlýyoruz.Diðer deðerlerle çakýþmasýný engellemek için  
+        AnaEkran.sa="";
+        AnaEkran.path.clear();
+        
+        }
+        System.out.println("----------------------------------------------------------------------------------------------------------------");
+}
+    
+    public GrafikKullanýmý() {
+        
+         try {
+            image =ImageIO.read(new FileImageInputStream( new File("kupa.png")));
+            image2 =ImageIO.read(new FileImageInputStream( new File("masteryo.png")));
+            image3 =ImageIO.read(new FileImageInputStream( new File("lukesky.png")));
+            image4 =ImageIO.read(new FileImageInputStream( new File("stormtrooper.png")));
+            image5 =ImageIO.read(new FileImageInputStream( new File("kylo_ren.png")));
+            image6 =ImageIO.read(new FileImageInputStream( new File("DarthVader.png")));
+            image7 =ImageIO.read(new FileImageInputStream( new File("can.png")));
+        } catch (IOException ex) {
+            Logger.getLogger(GrafikKullanýmý.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //Hangi iyi karakterin oluþcaðýný kontrol ediyoruz
+        if(iyiK.getKarakter_adi().equals("MasterYoda")){
+            can=MasterYoda.can_sayisi;
+        }else{
+            can=LukeSkywalker.can_sayisi;
+        }
+            
+        setBackground(Color.BLACK);
+        if(iyiK.getKarakter_adi().equals("MasterYoda")){
+            can=MasterYoda.can_sayisi;
+            can2=MasterYoda.can_sayisi;
+        }else{
+            can=LukeSkywalker.can_sayisi;
+            can2=LukeSkywalker.can_sayisi;
+        }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        
+    }
+    //Klavyeden gelen tuþ komutlarýnýnýn iyi karakterin kordinatý ile eþleþtirip haraketi saðlýyoruz
+    @Override
+    public void keyPressed(KeyEvent e) {
+      int tus =e.getKeyCode();
+         if(tus==KeyEvent.VK_UP&&harita[iyiK.getX()-1][iyiK.getY()]!=0){
+           if(iyiK.getX()>0){
+               tus_k++;
+           iyiK.setX(iyiK.getX()-1);
+           repaint();
+           }   
+       }
+       if(tus==KeyEvent.VK_DOWN){       
+           if(iyiK.getX()<10&&harita[iyiK.getX()+1][iyiK.getY()]!=0){
+               tus_k++;
+           iyiK.setX(iyiK.getX()+1);
+           repaint();
+           }   
+       }
+       if(tus==KeyEvent.VK_LEFT&&harita[iyiK.getX()][iyiK.getY()-1]!=0){
+           if(iyiK.getY()>0){
+               tus_k++;
+           iyiK.setY(iyiK.getY()-1);  
+           repaint();
+           }  
+       }
+       if(tus==KeyEvent.VK_RIGHT&&harita[iyiK.getX()][iyiK.getY()+1]!=0){
+           if(iyiK.getY()<13){
+               tus_k++;
+           iyiK.setY(iyiK.getY()+1);  
+           repaint();
+           } 
+       }
+       if(tus==KeyEvent.VK_UP||tus==KeyEvent.VK_DOWN||tus==KeyEvent.VK_LEFT||tus==KeyEvent.VK_RIGHT)
+            repaint();
+    }
+    
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        
+    }
+   
+}
+
+
+
+
+
+
+
+
+
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Karakter extends Lokasyon{
+    
+    private String Karakter_adi;
+    private String tur;
+        
+        public int min_distK2 =100;
+        public int degisim_k =0;
+        private static String k_tutucu="";
+	private static final int M = 11;
+	private static final int N = 14;
+        static String s="";
+       
+       static List<Integer>path2= new ArrayList<Integer>();
+       
+
+    
+    
+    public Karakter(int x, int y,String Karakter_adi,String tur) {
+        super(x, y);
+        this.Karakter_adi=Karakter_adi;
+        this.tur=tur;
+    }
+
+    public String getKarakter_adi() {
+        return Karakter_adi;
+    }
+
+    public void setKarakter_adi(String Karakter_adi) {
+        this.Karakter_adi = Karakter_adi;
+    }
+
+    public String getTur() {
+        return tur;
+    }
+
+    public void setTur(String tur) {
+        this.tur = tur;
+    }
+   
+    	
+	// Mevcut konumdan (x, y) konumuna gidip gelmeyeceðini kontrol edin.
+	// hücre, 0 deðerine sahipse veya önceden ziyaret edilmiþse false döndürür
+	private  boolean güvenliMi(int mat[][], int visited[][], int x, int y)
+	{      
+		return !(mat[x][y] == 0 || visited[x][y] != 0);
+	}
+
+	// geçerli bir konum deðilse, false döndür
+	private boolean alanKontrol(int x, int y)
+	{   
+		return (x < 11 && y < 14 && x >= 0 && y >= 0);
+	}
+
+	// Kaynak hücreden bir Matrix matýndaki Olasý En Kýsa Rotayý Bul (0, 0)
+        // hedef hücreye (x, y)
+        // 'min_dist' kaynaktan hedefe en uzun yolun uzunluðunu saklar
+        // þu ana kadar bulundu ve 'dist' kaynak hücreden yol uzunluðunu koruyor
+        // mevcut hücre (i, j)
+        
+	public  int findShortestPath(int mat[][], int[][] ziyaret,int i, int j, int x, int y, int min_adým, int adým)		 
+	{       
+                  if(min_adým!=AnaEkran.min_distK){
+                    AnaEkran.sa=AnaEkran.path.toString();
+                    min_distK2=min_adým;
+                    AnaEkran.min_distK=min_adým;
+                    
+                }
+                
+                if(degisim_k>adým){
+                    int fark=degisim_k-adým;
+                   for(int t=0;t<fark;t++){
+                       AnaEkran.path.remove(adým*2);
+                       AnaEkran.path.remove(adým*2);
+                   }
+                    degisim_k=adým;
+                }
+                
+               AnaEkran.path.add(i);
+               AnaEkran.path.add(j);
+               
+		if (i == x && j == y)
+		{       
+                    if(adým>min_adým){
+                        //path.clear();
+                    }
+			return Integer.min(adým, min_adým);
+		}
+
+		// ziyaret edilen (i, j) hücreyi ayarla
+		if(x==i&&y==j)
+                        ziyaret[i][j] = 0;
+                else{
+                    ziyaret[i][j] = 1;
+                }
+		
+                // sol hücreye git
+		if (alanKontrol(i, j - 1) && güvenliMi(mat, ziyaret, i, j - 1)) {
+                        degisim_k++;
+                        // path.add(i);
+                        // path.add(j);
+			min_adým = findShortestPath(mat, ziyaret, i, j - 1, x, y,min_adým, adým + 1);
+		
+                        
+		}
+                // üst hücreye git
+		if (alanKontrol(i - 1, j) && güvenliMi(mat, ziyaret, i - 1, j)) {
+                        degisim_k++;
+                        // path.add(i);
+                        // path.add(j);
+			min_adým = findShortestPath(mat, ziyaret, i - 1, j, x, y,min_adým, adým + 1);
+										
+		}
+
+		
+                // alt hücreye git
+		if (alanKontrol(i + 1, j) && güvenliMi(mat, ziyaret, i + 1, j)) {
+                        degisim_k++;
+                        // path.add(i);
+               // path.add(j);
+			min_adým = findShortestPath(mat, ziyaret, i + 1, j, x, y,min_adým, adým + 1);
+										
+		}
+
+		// sað hücreye git
+		if (alanKontrol(i, j + 1) && güvenliMi(mat, ziyaret, i, j + 1)) {
+                        degisim_k++;
+                       //  path.add(i);
+               // path.add(j);
+			min_adým = findShortestPath(mat, ziyaret, i, j + 1, x, y,min_adým, adým + 1);
+										
+		}
+
+		
+                
+
+		// Backtrack - (i, j) ziyaret edilen matristen kaldýr
+		ziyaret[i][j] = 0;
+          
+                
+		return min_adým;
+	}
+        
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public class KarakterUret {
+    
+    public Karakter karakter_uret(String karakter_adý){
+        
+      if(karakter_adý.equals("MasterYoda")){
+          return new MasterYoda(5,6,"MasterYoda","iyi",6);
+      }
+      else if(karakter_adý.equals("LukeSkywalker")){
+          
+          return new LukeSkywalker(5,6,"LukeSkywalker","iyi",3);
+      }
+      else{
+          return null;
+      }
+      
+    }
+    public Karakter karakter_uret2(String karakter_adý,int indis){
+     if(karakter_adý.equals("Stormtrooper")){
+          return new Stormtrooper(AnaEkran.kapiY[indis],AnaEkran.kapiX[indis],"Stormtrooper","kötü");
+      }
+     else if(karakter_adý.equals("DarthVader")){
+          return new DarthVader(AnaEkran.kapiY[indis],AnaEkran.kapiX[indis],"DarthVader","kötü");
+      }
+     else if(karakter_adý.equals("KYLOREN")){
+          return new KyloRen(AnaEkran.kapiY[indis],AnaEkran.kapiX[indis],"KYLOREN","kötü");
+      }
+     else{
+          return null;
+      }
+}
+    
+    
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public class KyloRen extends Karakter{
+    
+    public KyloRen(int x, int y, String Karakter_adi, String tur) {
+        super(x, y, Karakter_adi, tur);
+    }
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+public class Lokasyon {
+    
+    private int x;
+    private int y;
+
+    public Lokasyon(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+    
+    
+}
+
+
+
+
+
+
+
+public class LukeSkywalker extends Karakter {
+    static int can_sayisi;
+    public LukeSkywalker(int x, int y, String Karakter_adi, String tur,int can_sayisi) {
+        super(x, y, Karakter_adi, tur);
+        this.can_sayisi=can_sayisi;
+    }
+
+    public int getCan_sayisi() {
+        return can_sayisi;
+    }
+
+    public void setCan_sayisi(int can_sayisi) {
+        this.can_sayisi = can_sayisi;
+    }
+    
+    
+}
+
+
+
+
+
+
+
+
+
+public class MasterYoda extends Karakter{
+    static float can_sayisi;
+    public MasterYoda(int x, int y, String Karakter_adi, String tur,float can_sayisi) {
+        super(x, y, Karakter_adi, tur);
+        this.can_sayisi=can_sayisi;
+    }
+
+
+    public float getCan_sayisi() {
+        return can_sayisi;
+    }
+
+    public void setCan_sayisi(float can_sayisi) {
+        this.can_sayisi = can_sayisi;
+    }
+    
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public class Stormtrooper extends Karakter {
+    
+    public Stormtrooper(int x, int y, String Karakter_adi, String tur) {
+        super(x, y, Karakter_adi, tur);
+    }
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
